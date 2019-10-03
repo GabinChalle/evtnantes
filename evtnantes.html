@@ -52,7 +52,7 @@
 
     	box-shadow: 0 1px 1px #ccc;
     	border-radius: 2px;
-    	width: 800px;
+    	width: 700px;
     	padding: 10px;
     	margin: 45px auto 25px;
     	position:relative;
@@ -140,11 +140,14 @@
     	list-style: none;
     	width: 800px;
     	margin: 0 auto;
-    	text-align: left;
+    	text-align: center;
     }
 
     ul.grid li{
-    	padding: 2px;
+      margin-top: 5px;
+      margin-left: 5px;
+      width:280px;
+    	height:400px;
     	float:left;
     }
 
@@ -164,7 +167,7 @@
 
             <!-- These two buttons switch the layout variable,
                which causes the correct UL to be shown. -->
-        
+               <input type="text" v-model="searchString" placeholder="Enter your search terms" />
             <a class="list-icon" v-bind:class="{ 'active': layout == 'list'}" v-on:click="layout = 'list'"></a>
             <a class="grid-icon" v-bind:class="{ 'active': layout == 'grid'}" v-on:click="layout = 'grid'"></a>
           </div>
@@ -172,18 +175,23 @@
         
         
         <ul v-if="layout == 'grid'" class="grid">
-            <a v-for="record in records" v-bind:href="record.fields.media_1" target="_blank">
             
-            <li v-for="record in records">
+            <li v-for="record in filteredArticles">
               <a v-bind:href="record.fields.lien_agenda" target="_blank"><img v-bind:src="record.fields.media_1" /></a>
-              <p>{{ record.fields.nom }}</p>
+              <div class="form-group">
+                  
+                  <textarea class="form-control z-depth-1" id="exampleFormControlTextarea6" rows="4" disabled>Event : {{ record.fields.nom }}
+address : {{ record.fields.lieu }}
+place : {{ record.fields.lieu_quartier }}
+city : {{ record.fields.ville }}</textarea>
+                </div>
+              
             </li>
         </ul>
 
         <ul v-if="layout == 'list'" class="list">
-            <a v-for="record in records" v-bind:href="record.fields.media_1" target="_blank">
             
-            <li v-for="record in records">
+            <li v-for="record in filteredArticles">
               <a v-bind:href="record.fields.lien_agenda" target="_blank"><img v-bind:src="record.fields.media_1" /></a>
               <p> Event : {{ record.fields.nom }}</p>
               <p> address : {{ record.fields.lieu }}</p>
@@ -210,7 +218,8 @@
       var demo = new Vue({
         el: "#demo",
         data: {
-          records:null,
+          records:[],
+          searchString: "",
           layout: 'grid'
         },
 
@@ -235,7 +244,29 @@
             return v.replace(/T|Z/g, " ");
           }
         },*/
+        computed: {
+            // A computed property that holds only those articles that match the searchString.
+            filteredArticles: function() {
+            //authentification et accès à apiURL du prof
+            var self = this;
+            searchString = this.searchString;
+            var array = self.records;
+              if(!searchString){
+                  return self.records;
+              }
 
+              searchString = searchString.trim().toLowerCase();
+
+              array = self.records.filter(function(item){
+                  if(item.fields.nom.toLowerCase().indexOf(searchString) !== -1){
+                      return item;
+                  }
+              })
+
+            // Return an array with the filtered data.
+              return array;;
+          }
+        },
         methods: {
           fetchData: function() {
             //authentification et accès à apiURL du prof
